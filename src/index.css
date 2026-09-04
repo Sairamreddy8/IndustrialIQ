@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/*
+ * Palette is the validated data-viz reference instance.
+ * Marks are single-hue blue — bar length already carries magnitude, so colour
+ * is not spent re-encoding it. The four status colours are reserved for state
+ * and always ship beside a text label, never colour alone.
+ * Light mode only, deliberately.
+ */
+@theme {
+  --color-ink: #0b0b0b;
+  --color-ink-2: #52514e;
+  --color-ink-3: #898781;
+
+  --color-surface: #ffffff;
+  --color-plane: #f9f9f7;
+  --color-hairline: #e1e0d9;
+  --color-baseline: #c3c2b7;
+
+  --color-series: #2a78d6;
+  --color-series-light: #86b6ef;
+  --color-series-soft: #cde2fb;
+  --color-series-deep: #1c5cab;
+
+  --color-good: #008000;
+  --color-good-ink: #006300;
+  --color-warning: #ffa500;
+  --color-serious: #ec835a;
+  --color-critical: #d03b3b;
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-plane);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Columns of figures must align vertically. Hero numbers must not — proportional
+   figures read better at large sizes. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-hairline);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+.recharts-wrapper:focus,
+.recharts-surface:focus {
+  outline: none;
+}
+
+::selection {
+  background: var(--color-series-soft);
+}
