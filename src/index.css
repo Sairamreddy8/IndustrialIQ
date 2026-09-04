@@ -1,11 +1,20 @@
 @import "tailwindcss";
 
 /*
- * Palette is the validated data-viz reference instance.
- * Marks are single-hue blue — bar length already carries magnitude, so colour
- * is not spent re-encoding it. The four status colours are reserved for state
- * and always ship beside a text label, never colour alone.
- * Light mode only, deliberately.
+ * Five hues, and only five, across the whole product. Every one is a slot from
+ * the validated data-viz reference palette — none is eyeballed — and each
+ * carries one fixed meaning wherever it appears, so a reader learns the code
+ * once: blue is volume, aqua is a good outcome, yellow is late, red is lost,
+ * violet is demand.
+ *
+ * Orange was the obvious sixth and is deliberately absent: against red it
+ * measures ΔE 7.1 to normal vision and 5.6 under deuteranopia, well under the
+ * 15 floor, so the two would collapse into each other wherever both appear.
+ *
+ * `-ink` steps are the text-safe version of each hue (>= 4.5:1 on white); the
+ * plain step is for marks only. Aqua (2.8:1) and yellow (2.2:1) sit under 3:1
+ * as fills, so every chart using them ships visible labels — that relief is
+ * required, not optional. Light mode only, deliberately.
  */
 @theme {
   --color-ink: #0b0b0b;
@@ -17,16 +26,30 @@
   --color-hairline: #e1e0d9;
   --color-baseline: #c3c2b7;
 
+  /* Blue — volume: revenue, leads, every plain magnitude. */
   --color-series: #2a78d6;
   --color-series-light: #86b6ef;
   --color-series-soft: #cde2fb;
   --color-series-deep: #1c5cab;
 
-  --color-good: #008000;
-  --color-good-ink: #006300;
-  --color-warning: #ffa500;
-  --color-serious: #ec835a;
-  --color-critical: #d03b3b;
+  /* Aqua — a good outcome: delivered, on time, converting. */
+  --color-good: #1baf7a;
+  --color-good-ink: #0a6b4a;
+
+  /* Yellow — late or at risk. `-soft` is the same hue over white, for the
+     shortfall block, which covers most of the revenue plot and would shout at
+     full strength. */
+  --color-warning: #eda100;
+  --color-warning-soft: #fbeac7;
+  --color-warning-ink: #7a5200;
+
+  /* Red — lost, stalled, act now. */
+  --color-critical: #e34948;
+  --color-critical-ink: #b3282a;
+
+  /* Violet — demand: enquiries and the open pipeline. */
+  --color-demand: #4a3aa7;
+  --color-demand-ink: #3b2e86;
 
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }

@@ -7,15 +7,15 @@ import InsightCard from './InsightCard.jsx'
 import StateMessage from './StateMessage.jsx'
 import FunnelChart from './charts/FunnelChart.jsx'
 import DeliveryDots from './charts/DeliveryDots.jsx'
-import SourceChart from './charts/SourceChart.jsx'
+import RevenueTargetChart from './charts/RevenueTargetChart.jsx'
 import LostReasonBubbles from './charts/LostReasonBubbles.jsx'
 import {
   computeDeliveryStats,
   computeFunnel,
   computeKpis,
   computeLostReasons,
+  computeMonthlySeries,
   computeRepRollup,
-  computeSourceBreakdown,
   selectDeliveries,
   selectLeads,
 } from '../lib/analytics.js'
@@ -23,7 +23,13 @@ import { branchInsight } from '../lib/insights.js'
 import { formatDays, formatINR, formatNumber, formatPercent } from '../lib/format.js'
 
 /** Branch-level view inside the drill-down modal. */
-export default function BranchDetail({ dataset, filters, branchId, networkFunnel }) {
+export default function BranchDetail({
+  dataset,
+  filters,
+  branchId,
+  networkFunnel,
+  rangeLabel,
+}) {
   const [expandedRepId, setExpandedRepId] = useState(null)
 
   const view = useMemo(() => {
@@ -39,7 +45,7 @@ export default function BranchDetail({ dataset, filters, branchId, networkFunnel
       ),
       delivery: computeDeliveryStats(selectDeliveries(dataset, scoped)),
       lostReasons: computeLostReasons(leads),
-      sources: computeSourceBreakdown(leads),
+      monthly: computeMonthlySeries(dataset, scoped),
       insight: branchInsight(dataset, filters, branchId),
       manager:
         dataset.reps.find(
@@ -55,7 +61,7 @@ export default function BranchDetail({ dataset, filters, branchId, networkFunnel
     }
   }, [dataset, filters, branchId])
 
-  const { kpis, funnel, reps, delivery, lostReasons, sources, leadsByRep, manager, insight } =
+  const { kpis, funnel, reps, delivery, lostReasons, monthly, leadsByRep, manager, insight } =
     view
 
   return (
@@ -69,77 +75,89 @@ export default function BranchDetail({ dataset, filters, branchId, networkFunnel
         />
       )}
 
-      <section aria-label="Branch metrics" className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      {/* Five tiles into a two- or three-wide grid always leaves one cell
+          over, so the last one spans it. */}
+      <section
+        aria-label="Branch metrics"
+        className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
+      >
         <KpiCard
           label="Revenue"
+          accent="volume"
           value={formatINR(kpis.revenue)}
-          detail={`${formatPercent(kpis.revenueAttainment)} of target`}
+          detail={`${formatPercent(kpis.revenueAttainment)} of ${formatINR(kpis.targetRevenue)} target`}
         />
         <KpiCard
           label="Units"
+          accent="volume"
           value={formatNumber(kpis.units)}
           detail={`${formatPercent(kpis.unitAttainment)} of ${formatNumber(kpis.targetUnits)}`}
         />
         <KpiCard
           label="Lead to delivery"
+          accent="good"
           value={formatPercent(kpis.conversionRate)}
           detail={`${formatNumber(kpis.deliveredCount)} of ${formatNumber(kpis.leadCount)} leads`}
         />
         <KpiCard
           label="Open pipeline"
+          accent="demand"
           value={formatINR(kpis.openValue)}
           detail={`${formatNumber(kpis.openCount)} leads still live`}
         />
         <KpiCard
           label="Avg time to deliver"
+          accent="warning"
           value={formatDays(kpis.avgDaysToDeliver, 1)}
           detail={`${formatPercent(kpis.delayedRate)} ran late`}
           tone={kpis.delayedRate > 40 ? 'warning' : 'neutral'}
+          className="col-span-2 sm:col-span-2 lg:col-span-1"
         />
       </section>
 
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-        <div className="space-y-4">
-          <Card title="Conversion funnel" subtitle="Each step compared with the network">
-            {kpis.leadCount ? (
-              <FunnelChart stages={funnel} benchmark={networkFunnel} benchmarkLabel="network" />
-            ) : (
-              <StateMessage title="No leads for this branch" />
-            )}
-          </Card>
+      {/* Two flush rows. The branch's own month-by-month trend leads, because
+          "are we behind, and since when" is the first thing asked of a branch;
+          the funnel and the two quality panels answer why. */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card
+          title="Revenue against target"
+          subtitle={`Recognised on delivery date · ${rangeLabel}`}
+        >
+          {monthly.length ? (
+            <RevenueTargetChart data={monthly} />
+          ) : (
+            <StateMessage title="No months in this period" />
+          )}
+        </Card>
 
-          <Card
-            title="Where its leads come from"
-            subtitle="Share of each source that reached delivery"
-          >
-            {sources.length ? (
-              <SourceChart data={sources} />
-            ) : (
-              <StateMessage title="No leads for this branch" />
-            )}
-          </Card>
-        </div>
+        <Card title="Why leads were lost" subtitle={`${formatNumber(kpis.lostCount)} lost leads`}>
+          {lostReasons.length ? (
+            <LostReasonBubbles rows={lostReasons} />
+          ) : (
+            <StateMessage title="No lost leads for this branch" />
+          )}
+        </Card>
+      </div>
 
-        <div className="space-y-4">
-          <Card
-            title="Delivery reliability"
-            subtitle={`${formatNumber(delivery.count)} deliveries · ${formatDays(delivery.avgDays, 1)} average`}
-          >
-            {delivery.count ? (
-              <DeliveryDots stats={delivery} />
-            ) : (
-              <StateMessage title="No deliveries in this period" />
-            )}
-          </Card>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card title="Conversion funnel" subtitle="Each step compared with the network">
+          {kpis.leadCount ? (
+            <FunnelChart stages={funnel} benchmark={networkFunnel} benchmarkLabel="network" />
+          ) : (
+            <StateMessage title="No leads for this branch" />
+          )}
+        </Card>
 
-          <Card title="Why leads were lost" subtitle={`${formatNumber(kpis.lostCount)} lost leads`}>
-            {lostReasons.length ? (
-              <LostReasonBubbles rows={lostReasons} />
-            ) : (
-              <StateMessage title="No lost leads for this branch" />
-            )}
-          </Card>
-        </div>
+        <Card
+          title="Delivery reliability"
+          subtitle={`${formatNumber(delivery.count)} deliveries · ${formatDays(delivery.avgDays, 1)} average`}
+        >
+          {delivery.count ? (
+            <DeliveryDots stats={delivery} />
+          ) : (
+            <StateMessage title="No deliveries in this period" />
+          )}
+        </Card>
       </div>
 
       <Card

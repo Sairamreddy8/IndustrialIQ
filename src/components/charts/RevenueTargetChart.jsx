@@ -11,7 +11,7 @@ import ChartTooltip from './ChartTooltip.jsx'
 import { formatINR, formatMonth, formatMonthShort, formatPercent, pct } from '../../lib/format.js'
 
 const DELIVERED = 'var(--color-series)'
-const SHORTFALL = 'var(--color-hairline)'
+const SHORTFALL = 'var(--color-warning-soft)'
 
 /**
  * Delivered revenue against target, by calendar month, as a deficit bar.
@@ -23,8 +23,11 @@ const SHORTFALL = 'var(--color-hairline)'
  * empty plot — stacking the shortfall on top uses that space to state the gap
  * instead of leaving it blank.
  *
- * Both segments are rupees on one axis, and the shortfall is a neutral rather
- * than a second hue: it is absence, not a competing category.
+ * Both segments are rupees on one axis. The shortfall wears a soft step of the
+ * warning hue rather than a grey: at 11% attainment it is most of every bar, and
+ * what it represents — the gap to a target nobody is hitting — is precisely what
+ * yellow means everywhere else here. Softened, because at full strength a block
+ * that size would drown the delivered figure it exists to frame.
  */
 export default function RevenueTargetChart({ data }) {
   const rows = data.map((month) => ({

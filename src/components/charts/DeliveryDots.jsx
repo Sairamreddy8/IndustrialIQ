@@ -6,17 +6,30 @@ import { formatDays, formatNumber, formatPercent } from '../../lib/format.js'
  * from 6 to 47, which is exactly the range where individual marks beat an
  * aggregate.
  *
- * On-time and delayed are states, so they use the reserved status colours —
- * each named in the legend, never colour alone.
+ * Yellow is late and aqua is on time, the same two hues this product uses for
+ * those states everywhere else. Each is named with its count in the legend, so
+ * the colour is never the only thing saying which is which — and since both sit
+ * under the 3:1 mark floor, that legend is required relief, not a nicety.
  */
 export default function DeliveryDots({ stats }) {
   const onTime = stats.count - stats.delayedCount
 
   return (
-    <div>
+    // Centred rather than anchored: a branch with six deliveries has little to
+    // show, and when the card stretches to its neighbour the leftover height
+    // reads as deliberate air only if it falls evenly above and below.
+    <div className="flex grow flex-col justify-center">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-        <Legend tone="text-serious" label={`${formatNumber(stats.delayedCount)} delayed`} />
-        <Legend tone="text-good" label={`${formatNumber(onTime)} on time`} />
+        <Legend
+          dot="bg-warning"
+          tone="text-warning-ink"
+          label={`${formatNumber(stats.delayedCount)} delayed`}
+        />
+        <Legend
+          dot="bg-good"
+          tone="text-good-ink"
+          label={`${formatNumber(onTime)} on time`}
+        />
       </div>
 
       <ul
@@ -28,15 +41,15 @@ export default function DeliveryDots({ stats }) {
           // Delayed first, so the run of late deliveries reads as a block.
           <li
             key={i}
-            className={`size-3 rounded-[3px] bg-current ${
-              i < stats.delayedCount ? 'text-serious' : 'text-good'
+            className={`size-3 rounded-[3px] ${
+              i < stats.delayedCount ? 'bg-warning' : 'bg-good'
             }`}
           />
         ))}
       </ul>
 
       <p className="mt-3 text-sm text-ink-2">
-        <span className="font-semibold text-serious">
+        <span className="font-semibold text-warning-ink">
           {formatPercent(stats.delayedRate)}
         </span>{' '}
         missed their promised date, averaging {formatDays(stats.avgDays, 1)} to hand over.
@@ -64,10 +77,11 @@ export default function DeliveryDots({ stats }) {
   )
 }
 
-function Legend({ tone, label }) {
+/** The swatch wears the mark colour; the words wear the readable ink step. */
+function Legend({ dot, tone, label }) {
   return (
     <span className={`flex items-center gap-1.5 text-xs font-medium ${tone}`}>
-      <span aria-hidden="true" className="size-2.5 rounded-[3px] bg-current" />
+      <span aria-hidden="true" className={`size-2.5 rounded-[3px] ${dot}`} />
       {label}
     </span>
   )

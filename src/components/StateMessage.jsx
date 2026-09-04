@@ -4,7 +4,7 @@ export default function StateMessage({ title, body, action, tone = 'neutral' }) 
     <div className="flex flex-col items-center justify-center px-6 py-10 text-center">
       <p
         className={`text-sm font-semibold ${
-          tone === 'error' ? 'text-critical' : 'text-ink'
+          tone === 'error' ? 'text-critical-ink' : 'text-ink'
         }`}
       >
         {title}

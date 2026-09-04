@@ -11,7 +11,7 @@ const STAGE_CLASS = {
   negotiation: 'bg-series-soft text-series-deep',
   order_placed: 'bg-series-soft text-series-deep',
   delivered: 'bg-good/12 text-good-ink',
-  lost: 'bg-critical/12 text-critical',
+  lost: 'bg-critical/12 text-critical-ink',
 }
 
 export default function StageBadge({ stage }) {

@@ -2,13 +2,15 @@
  * One actionable finding: what is wrong, the numbers behind it, and the thing
  * to do about it.
  *
- * Severity uses the reserved status colours, always beside a written label, so
- * the colour never carries the meaning on its own.
+ * Severity uses the reserved state hues, always beside a written label, so the
+ * colour never carries the meaning on its own. The dot wears the mark step and
+ * the words the darker ink step, because a 3.9:1 red is legible as a shape and
+ * not as 12px type.
  */
 const SEVERITY = {
-  critical: { label: 'Act now', dot: 'text-critical', text: 'text-critical' },
-  warning: { label: 'Watch', dot: 'text-serious', text: 'text-serious' },
-  info: { label: 'Note', dot: 'text-ink-3', text: 'text-ink-2' },
+  critical: { label: 'Act now', dot: 'bg-critical', text: 'text-critical-ink' },
+  warning: { label: 'Watch', dot: 'bg-warning', text: 'text-warning-ink' },
+  info: { label: 'Note', dot: 'bg-ink-3', text: 'text-ink-2' },
 }
 
 export default function InsightCard({ insight, link }) {
@@ -27,7 +29,7 @@ export default function InsightCard({ insight, link }) {
     <article className="flex flex-col gap-3 rounded-lg border border-hairline bg-surface p-4 sm:flex-row sm:items-start sm:gap-5">
       <div className="min-w-0 flex-1">
         <p className={`flex items-center gap-1.5 text-xs font-semibold ${tone.text}`}>
-          <span aria-hidden="true" className={`size-2 rounded-full bg-current ${tone.dot}`} />
+          <span aria-hidden="true" className={`size-2 rounded-full ${tone.dot}`} />
           {tone.label}
         </p>
         <h3 className="mt-1.5 text-sm font-semibold text-ink">{insight.title}</h3>

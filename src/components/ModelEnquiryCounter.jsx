@@ -35,9 +35,9 @@ export default function ModelEnquiryCounter({ rows }) {
   const total = rows.reduce((sum, r) => sum + r.count, 0)
 
   return (
-    <div>
-      {/* Two rows of four: seven models fill all but the last cell. */}
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-4">
+    /* Two rows of four. Seven models leave one cell over, so the footnote
+       takes it rather than opening a row of its own under an empty square. */
+    <ul className="grid grow grid-cols-2 content-center gap-x-4 gap-y-6 sm:grid-cols-4">
         {rows.map((row, i) => {
           const portion = filled ? row.count / max : 0
           return (
@@ -61,7 +61,7 @@ export default function ModelEnquiryCounter({ rows }) {
                     cy="40"
                     r={RADIUS}
                     fill="none"
-                    stroke="var(--color-series)"
+                    stroke="var(--color-demand)"
                     strokeWidth="7"
                     strokeLinecap="round"
                     strokeDasharray={CIRCUMFERENCE}
@@ -86,12 +86,11 @@ export default function ModelEnquiryCounter({ rows }) {
             </li>
           )
         })}
-      </ul>
-
-      <p className="mt-5 border-t border-hairline pt-3 text-xs text-ink-3">
-        {formatNumber(total)} enquiries across {rows.length} models · rings are relative
-        to {rows[0].model}, the most enquired
-      </p>
-    </div>
+      <li className="flex flex-col justify-center text-[11px] leading-snug text-ink-3">
+        <span className="tnum font-semibold text-ink">{formatNumber(total)} enquiries</span>
+        across {rows.length} models. Rings are relative to {rows[0].model}, the most
+        enquired.
+      </li>
+    </ul>
   )
 }

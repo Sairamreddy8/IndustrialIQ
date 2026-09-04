@@ -95,26 +95,31 @@ function OverviewContent({ dataset, range, rangeLabel }) {
       <section aria-label="Key metrics" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <KpiCard
           label="Revenue delivered"
+          accent="volume"
           value={formatINR(kpis.revenue)}
           detail={`${formatPercent(kpis.revenueAttainment)} of ${formatINR(kpis.targetRevenue)} target`}
         />
         <KpiCard
           label="Units delivered"
+          accent="volume"
           value={formatNumber(kpis.units)}
           detail={`${formatPercent(kpis.unitAttainment)} of ${formatNumber(kpis.targetUnits)} target`}
         />
         <KpiCard
           label="Lead to delivery"
+          accent="good"
           value={formatPercent(kpis.conversionRate)}
           detail={`${formatNumber(kpis.deliveredCount)} delivered from ${formatNumber(kpis.leadCount)} leads`}
         />
         <KpiCard
           label="Open pipeline"
+          accent="demand"
           value={formatINR(kpis.openValue)}
           detail={`${formatNumber(kpis.openCount)} leads live now`}
         />
         <KpiCard
           label="Top branch"
+          accent="good"
           value={topBranch ? topBranch.name.replace(' Toyota', '') : '—'}
           detail={
             topBranch
@@ -125,6 +130,7 @@ function OverviewContent({ dataset, range, rangeLabel }) {
         />
         <KpiCard
           label="Avg time to deliver"
+          accent="warning"
           value={formatDays(kpis.avgDaysToDeliver, 1)}
           detail={`${formatPercent(kpis.delayedRate)} of deliveries ran late`}
           tone={kpis.delayedRate > 40 ? 'warning' : 'neutral'}
@@ -134,7 +140,7 @@ function OverviewContent({ dataset, range, rangeLabel }) {
       <Card
         icon={<DangerIcon />}
         title="Requires attention!"
-        titleClassName="text-critical"
+        titleClassName="text-critical-ink"
         badge={actions.length || null}
         collapsible
         defaultOpen={false}
@@ -169,9 +175,50 @@ function OverviewContent({ dataset, range, rangeLabel }) {
         )}
       </Card>
 
-      {/* Delivery reliability and model demand side by side: both are short,
-          so pairing them keeps the row from running ragged. */}
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+      {/* Where leads fall out, and why — the two halves of one question, so
+          they sit on one row. Grid items stretch, so the shorter card fills
+          the row rather than trailing blank surface under it. */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card
+          title="Conversion funnel"
+          subtitle={`Every stage each of ${formatNumber(kpis.leadCount)} leads reached`}
+        >
+          {kpis.leadCount ? (
+            <FunnelChart stages={funnel} />
+          ) : (
+            <StateMessage title="No leads in this period" />
+          )}
+        </Card>
+
+        <Card
+          title="Why leads were lost"
+          subtitle={`${formatNumber(kpis.lostCount)} lost leads across the network`}
+        >
+          {lostReasons.length ? (
+            <LostReasonBubbles rows={lostReasons} />
+          ) : (
+            <StateMessage title="No lost leads in this period" />
+          )}
+        </Card>
+      </div>
+
+      {/* Three panels of near-identical natural height — where leads come
+          from, how well we hand cars over, what buyers ask for — so they tile
+          into one band instead of two ragged pairs. Three-up needs real width:
+          below xl the rings card spans the pair below it rather than squeezing
+          a third column that cannot hold eight 80px rings. */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <Card
+          title="Lead source performance"
+          subtitle="Share of each source's leads that reached delivery"
+        >
+          {sources.length ? (
+            <SourceChart data={sources} />
+          ) : (
+            <StateMessage title="No leads in this period" />
+          )}
+        </Card>
+
         <Card
           title="Delivery reliability"
           subtitle={`${formatNumber(delivery.count)} deliveries · ${formatDays(delivery.avgDays, 1)} average`}
@@ -183,52 +230,17 @@ function OverviewContent({ dataset, range, rangeLabel }) {
           )}
         </Card>
 
-        <Card title="Enquiries by model" subtitle="Which cars buyers are asking about">
+        <Card
+          title="Enquiries by model"
+          subtitle="Which cars buyers are asking about"
+          className="md:col-span-2 xl:col-span-1"
+        >
           {models.length ? (
             <ModelEnquiryCounter rows={models} />
           ) : (
             <StateMessage title="No enquiries in this period" />
           )}
         </Card>
-      </div>
-
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-        <div className="space-y-4">
-          <Card
-            title="Conversion funnel"
-            subtitle={`Every stage each of ${formatNumber(kpis.leadCount)} leads reached`}
-          >
-            {kpis.leadCount ? (
-              <FunnelChart stages={funnel} />
-            ) : (
-              <StateMessage title="No leads in this period" />
-            )}
-          </Card>
-        </div>
-
-        <div className="space-y-4">
-          <Card
-            title="Lead source performance"
-            subtitle="Share of each source's leads that reached delivery"
-          >
-            {sources.length ? (
-              <SourceChart data={sources} />
-            ) : (
-              <StateMessage title="No leads in this period" />
-            )}
-          </Card>
-
-          <Card
-            title="Why leads were lost"
-            subtitle={`${formatNumber(kpis.lostCount)} lost leads across the network`}
-          >
-            {lostReasons.length ? (
-              <LostReasonBubbles rows={lostReasons} />
-            ) : (
-              <StateMessage title="No lost leads in this period" />
-            )}
-          </Card>
-        </div>
       </div>
 
       <Card
@@ -260,6 +272,7 @@ function OverviewContent({ dataset, range, rangeLabel }) {
             filters={filters}
             branchId={openBranch.id}
             networkFunnel={funnel}
+            rangeLabel={rangeLabel}
           />
         )}
       </Modal>
@@ -271,14 +284,19 @@ function OverviewSkeleton() {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {Array.from({ length: 5 }, (_, i) => (
+        {Array.from({ length: 6 }, (_, i) => (
           <KpiSkeleton key={i} />
         ))}
       </div>
       <PanelSkeleton rows={5} />
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-        <PanelSkeleton rows={6} />
-        <PanelSkeleton rows={6} />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <PanelSkeleton rows={7} />
+        <PanelSkeleton rows={7} />
+      </div>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <PanelSkeleton rows={5} />
+        <PanelSkeleton rows={5} />
+        <PanelSkeleton rows={5} />
       </div>
       <PanelSkeleton rows={5} />
     </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BAR_SHADES } from './shades.js'
+import { MARK } from './shades.js'
 import { formatNumber, formatPercent } from '../../lib/format.js'
 
 const MAX_DIAMETER = 78
@@ -20,8 +20,9 @@ function prefersReducedMotion() {
  * the big reasons by squaring them. Every bubble carries its own count, so
  * nothing rests on judging one circle against another.
  *
- * Fills alternate between the two blues as rhythm, matching the bar charts;
- * area is the encoding.
+ * All nine are the one red, because all nine mean the same thing — a lead the
+ * network lost. Area is the encoding; shading them by count as well would say
+ * the number twice and leave the hue saying nothing.
  */
 export default function LostReasonBubbles({ rows }) {
   const [grown, setGrown] = useState(prefersReducedMotion)
@@ -37,7 +38,7 @@ export default function LostReasonBubbles({ rows }) {
   const max = Math.max(...rows.map((r) => r.count), 1)
 
   return (
-    <ul className="flex flex-wrap items-end justify-center gap-x-4 gap-y-4 pt-1">
+    <ul className="flex grow flex-wrap items-end justify-center gap-x-4 gap-y-6 pt-1 content-center">
       {rows.map((row, i) => {
         const diameter = Math.max(
           MIN_DIAMETER,
@@ -50,7 +51,7 @@ export default function LostReasonBubbles({ rows }) {
               style={{
                 width: `${diameter}px`,
                 height: `${diameter}px`,
-                background: BAR_SHADES[i % BAR_SHADES.length],
+                background: MARK.critical,
                 transform: grown ? 'scale(1)' : 'scale(0.2)',
                 transitionDelay: `${i * 60}ms`,
               }}

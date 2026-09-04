@@ -28,7 +28,7 @@ export default function Card({
         {icon}
         {title}
         {badge != null && (
-          <span className="tnum rounded-full bg-critical/12 px-2 py-0.5 text-xs font-semibold text-critical">
+          <span className="tnum rounded-full bg-critical/12 px-2 py-0.5 text-xs font-semibold text-critical-ink">
             {badge}
           </span>
         )}
@@ -38,7 +38,10 @@ export default function Card({
   )
 
   return (
-    <section id={id} className={`rounded-xl border border-hairline bg-surface ${className}`}>
+    <section
+      id={id}
+      className={`flex flex-col rounded-xl border border-hairline bg-surface ${className}`}
+    >
       {collapsible ? (
         <button
           type="button"
@@ -68,7 +71,14 @@ export default function Card({
         )
       )}
 
-      <div id={bodyId} hidden={collapsible && !open} className="p-4 sm:p-5">
+      {/* A column that grows: side-by-side cards stretch to the tallest in
+          their row, and a child marked `grow` takes up the slack rather than
+          leaving a pocket of blank surface under it. */}
+      <div
+        id={bodyId}
+        hidden={collapsible && !open}
+        className="flex grow flex-col p-4 sm:p-5"
+      >
         {children}
       </div>
     </section>

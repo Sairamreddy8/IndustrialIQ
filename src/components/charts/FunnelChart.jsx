@@ -1,4 +1,4 @@
-import { BAR_SHADES } from './shades.js'
+import { MARK } from './shades.js'
 import { STAGE_LABELS } from '../../lib/constants.js'
 import { formatNumber, formatPercent } from '../../lib/format.js'
 
@@ -16,7 +16,10 @@ export default function FunnelChart({ stages, benchmark, benchmarkLabel = 'netwo
   const top = stages[0]?.count || 1
 
   return (
-    <ol className="space-y-1">
+    // gap-1 is the floor between stages; justify-between hands any height the
+    // card gained from its taller neighbour back to those gaps, so the funnel
+    // reaches the foot of the card instead of stopping short of it.
+    <ol className="flex grow flex-col justify-between gap-1">
       {stages.map((stage, i) => {
         const width = Math.max((stage.count / top) * 100, 2)
         const isLast = i === stages.length - 1
@@ -43,7 +46,11 @@ export default function FunnelChart({ stages, benchmark, benchmarkLabel = 'netwo
                 className="h-full rounded"
                 style={{
                   width: `${width}%`,
-                  background: BAR_SHADES[i % BAR_SHADES.length],
+                  // Blue is volume all the way down, and the last bar turns
+                  // aqua because that is what a delivered lead is coloured
+                  // everywhere else on the page — the funnel's payoff, in the
+                  // hue the reader has already learned.
+                  background: stage.stage === 'delivered' ? MARK.good : MARK.volume,
                 }}
                 role="img"
                 aria-label={`${formatNumber(stage.count)} leads reached ${STAGE_LABELS[stage.stage]}`}
@@ -53,7 +60,7 @@ export default function FunnelChart({ stages, benchmark, benchmarkLabel = 'netwo
             {!isLast && (
               <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 py-1.5 pl-1 text-[11px] text-ink-3">
                 <span aria-hidden="true">↓</span>
-                <span className={`tnum ${behind ? 'font-medium text-critical' : ''}`}>
+                <span className={`tnum ${behind ? 'font-medium text-critical-ink' : ''}`}>
                   {formatPercent(next.stepConversion)} continue
                 </span>
                 <span aria-hidden="true">·</span>

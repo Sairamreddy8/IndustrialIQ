@@ -64,10 +64,34 @@ branch table, with rep detail as an expandable row inside it. State lives in
 - **`pct()` returns `null`, never `NaN`/`Infinity`**, and `format*()` renders `null` as
   `—`. This is what makes empty periods and lead-less reps degrade cleanly. Do not
   replace it with raw division.
-- **Charts:** marks are single-hue blue; the two shades in `charts/shades.js` alternate
-  row-by-row on the horizontal bar charts as rhythm, not encoding, so those charts carry
-  no colour legend. The four status colours (`good`/`warning`/`serious`/`critical`) are
-  reserved for state and always ship beside a text label. One y-axis, never two.
+- **Panels in a row stretch to the tallest, and their contents take up the slack.**
+  `Card` is a flex column whose body grows, so a grid row must not carry
+  `items-start`. A chart that can absorb height marks its root `grow`
+  (`SourceChart`), a list distributes into it (`FunnelChart` uses
+  `justify-between` over a `gap-1` floor), and content that cannot grow centres
+  instead (`DeliveryDots`, `LostReasonBubbles`) — slack split evenly reads as
+  air, slack dumped at one end reads as a bug. Where a grid leaves an odd cell
+  over, something fills it rather than the row growing: the model rings put
+  their footnote in the eighth cell, and the branch modal's fifth KPI spans the
+  gap at two and three columns wide.
+- **Five hues, and only five, each with one fixed meaning.** Blue is volume, aqua a
+  good outcome, yellow late or at risk, red lost, violet demand. Every one is a slot
+  from the data-viz skill's reference palette — none is eyeballed — and the meaning
+  holds everywhere: the aqua on the source bars, the funnel's last bar and the on-time
+  deliveries is the same aqua because all three mean a lead that went well. Orange is
+  deliberately absent; against red it measures ΔE 7.1 to normal vision, under the 15
+  floor, so the two would collapse. `charts/shades.js` (`MARK`) names which hue each
+  chart carries. Do not add a sixth without running
+  `scripts/validate_palette.js` from the dataviz skill.
+- **Each chart plots one series, so colour never says which bar is which** — length
+  already does. It says what the panel is *about*. Never colour nominal bars by their
+  value; that spends the identity channel restating the bar length.
+- **Aqua (2.8:1) and yellow (2.2:1) are under the 3:1 mark floor, so charts using them
+  ship visible labels** — the source bars carry an end-of-bar percentage, the delivery
+  dots a counted legend. That relief is required, not decoration: do not remove those
+  labels. The `-ink` step of each hue is the text-safe one (≥ 4.5:1); the plain step is
+  for fills only, so a mark wears `bg-critical` while the words beside it wear
+  `text-critical-ink`. One y-axis, never two.
 - **Colour tokens live in `src/index.css`** under Tailwind v4 `@theme`. Use the token
   utilities (`text-ink-2`, `bg-series`), not raw hex.
 - `.tnum` (tabular figures) belongs on table columns and axis ticks, never on hero
