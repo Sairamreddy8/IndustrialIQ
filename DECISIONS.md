@@ -15,16 +15,16 @@ worst for 195 days against a 17-day median. Neither fact is visible in the raw f
 So I built the five minimum requirements properly, then spent the open-ended budget on the
 three things that surface and act on that story.
 
-| From the brief | Where it lives |
-|---|---|
-| Overview dashboard | KPI row, deficit chart vs target, funnel, loss reasons, sources, delivery, model demand, branch table |
-| Drill-down | Network → branch (modal) → rep (expanding row inside it) |
-| Actionable insight | "Requires attention!" panel, plus one finding per branch |
-| Filtering / time range | Presets and a custom month span in the navbar |
-| Responsive | Driven at 1512 / 1024 / 820 with no horizontal overflow |
-| **Lead aging & follow-up alerts** | Three aging rules, plus an Idle column on every lead list |
-| **Conversion funnel** | Stage-by-stage drop-off, with branch-vs-network benchmarking |
-| **Automatic flagging** | Per-branch rules measured against the network baseline |
+| From the brief                    | Where it lives                                                                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Overview dashboard                | KPI row, deficit chart vs target, funnel, loss reasons, sources, delivery, model demand, branch table |
+| Drill-down                        | Network → branch (modal) → rep (expanding row inside it)                                              |
+| Actionable insight                | "Requires attention!" panel, plus one finding per branch                                              |
+| Filtering / time range            | Presets and a custom month span in the navbar                                                         |
+| Responsive                        | Driven at 1512 / 1024 / 820 with no horizontal overflow                                               |
+| **Lead aging & follow-up alerts** | Three aging rules, plus an Idle column on every lead list                                             |
+| **Conversion funnel**             | Stage-by-stage drop-off, with branch-vs-network benchmarking                                          |
+| **Automatic flagging**            | Per-branch rules measured against the network baseline                                                |
 
 Everything is client-side: 510 leads recompute in memory instantly on every filter change,
 so a backend would have added deployment surface without making anything faster.
@@ -40,12 +40,12 @@ median contacted-to-test-drive gap here is 5.9 days, so a week of silence is alr
 off-pattern. Findings sort by severity then rupees at stake, so the most expensive critical
 item leads the page.
 
-**The conversion funnel.** It counts every stage a lead *ever reached*, read from
+**The conversion funnel.** It counts every stage a lead _ever reached_, read from
 `status_history`, not its current status — otherwise a delivered lead would not count as
 having been contacted and every step would undercount. Each step shows how many continued,
 how many fell out, and what share of the cohort survives. In the drill-down the same
 component takes the network funnel as a benchmark and marks any step more than five points
-behind it, so a manager sees where *their* branch leaks rather than holding a number in
+behind it, so a manager sees where _their_ branch leaks rather than holding a number in
 their head from the previous screen.
 
 **Automatic flagging.** Each branch runs four rules and the most severe finding is shown;
@@ -56,18 +56,18 @@ not statistical anomaly detection — five branches is not enough population for
 mean anything, and a threshold I can explain to a CEO beats a statistic I cannot. It returns
 nothing when a branch is clean: a branch with no problem must not have one manufactured.
 
-## Key product decisions and tradeoffs
+## Product decisions and tradeoffs
 
 **Everything time-relative is anchored to the data, not the clock.** The dataset ends
 31 Dec 2025. Measuring idle days from `Date.now()` would report every lead as ~250 days stale
 and make the aging alerts worthless. The app derives its as-of date from the newest activity
-and shows it in the header, so "Last 30 days" means the last 30 *of the data*.
+and shows it in the header, so "Last 30 days" means the last 30 _of the data_.
 
 **Revenue counts on delivery, leads on creation — so there are two "delivered" numbers, kept
 apart on purpose.** Units and rupees count on `delivery_date`, what the targets are written
 against; leads and the funnel bucket on `created_at`. Conversion therefore needs a cohort —
-leads *created* in the period that went on to deliver — while attainment needs deliveries
-*recognised* in it. They agree over the full range and diverge under a filter, which looks
+leads _created_ in the period that went on to deliver — while attainment needs deliveries
+_recognised_ in it. They agree over the full range and diverge under a filter, which looks
 like a bug until labelled, so the branch table says "Converted" and "Units vs target" and the
 subtitle spells out the difference.
 
@@ -83,18 +83,6 @@ biggest caveat on those numbers, and I have not smoothed it.
 target line were slivers beneath an empty plot. Stacking the shortfall on top means each bar
 spans the full target and attainment reads as how far the colour climbs — the empty space
 now states the gap instead of just being empty.
-
-**Colour is a five-hue system where hue carries meaning.** Blue is volume, aqua a good
-outcome, yellow late or at risk, red lost, violet demand — and the meaning holds everywhere,
-so the aqua on the source bars, the funnel's last bar and the on-time deliveries is one
-aqua, because all three mean a lead that went well. Every value comes from a validated
-reference palette, and I ran the set through a contrast and colour-blindness validator
-rather than trusting my eye. That changed the outcome twice: orange was the obvious sixth
-hue but measures ΔE 7.1 against red to normal vision, under the floor, so the two would
-collapse for some readers and I dropped it; and aqua and yellow sit below the 3:1 mark
-floor, so their charts carry mandatory value labels — relief, not decoration. Layout follows
-the same discipline: panels in a row stretch to the tallest and their contents take up the
-slack, centred rather than dumped at one end.
 
 **Drill-down is a modal, not routes.** It keeps the app one page, branch context adjacent to
 the network numbers. The cost is real: a branch view is not linkable, and the back button
