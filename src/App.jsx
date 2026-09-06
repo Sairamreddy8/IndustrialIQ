@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import Overview from './pages/Overview.jsx'
 import FilterBar from './components/FilterBar.jsx'
+import Logo from './components/Logo.jsx'
 import { useDataset } from './context/useDataset.js'
 import { resolveRange } from './lib/ranges.js'
 import { formatDate } from './lib/format.js'
@@ -22,10 +23,13 @@ export default function App() {
         {/* Three tracks so the range control sits centred in the bar, with the
             title and the as-of stamp balanced either side of it. Below lg it
             stacks and the filter centres on its own row. */}
-        <div className="mx-auto grid max-w-[90rem] items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-6 lg:grid-cols-[1fr_auto_1fr]">
-          <div className="text-center lg:text-left">
-            <h1 className="text-lg font-semibold tracking-tight text-ink">DealerPulse</h1>
-            <p className="text-xs text-ink-3">Dealership network performance</p>
+        <div className="mx-auto grid max-w-[90rem] items-center gap-x-6 gap-y-3 px-4 py-4 sm:px-6 sm:py-5 lg:grid-cols-[1fr_auto_1fr]">
+          <div className="flex items-center justify-center gap-3 lg:justify-start">
+            <Logo className="size-10 shrink-0" />
+            <div>
+              <h1 className="text-xl font-semibold tracking-tight text-ink">DealerPulse</h1>
+              <p className="text-sm text-ink-3">Dealership network performance</p>
+            </div>
           </div>
 
           {status === 'ready' && (
